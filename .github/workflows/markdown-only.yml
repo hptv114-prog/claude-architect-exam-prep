@@ -1,0 +1,25 @@
+name: markdown-only
+
+# Run on every push and on every pull request.
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # Download the repo's files onto GitHub's computer.
+      - uses: actions/checkout@v4
+
+      # List every tracked file and flag anything that isn't allowed.
+      # Allowed: *.md, .gitignore, LICENSE, and the .github/ and .claude/ folders.
+      - name: Fail if any non-markdown file is found
+        run: |
+          bad=$(git ls-files | grep -vE '\.md$|^\.gitignore$|^LICENSE$|^\.github/|^\.claude/' || true)
+          if [ -n "$bad" ]; then
+            echo "These files are not allowed (only .md is):"
+            echo "$bad"
+            exit 1
+          fi
+          echo "All files are allowed."
